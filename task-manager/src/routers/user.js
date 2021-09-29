@@ -1,7 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const bcrypt = require('bcrypt')
-
+const auth = require('../middleware/auth')
 const router =  express.Router();
 
 
@@ -21,11 +21,12 @@ router.post('/user' ,async(req,res)=> {
     }
     try
     {
-     
+    
      const password = await bcrypt.hash(req.body.password , 8)   
     const user  = new User({...req.body , password})
     await user.save()
-    res.send({ confirmation  : "user created successfully" , ...req.body  }) 
+    const token =  await user.generateAuthToken()
+    res.send({ confirmation  : "user created successfully" , ...req.body  ,token }) 
 
     }
     catch(e)
@@ -35,8 +36,18 @@ router.post('/user' ,async(req,res)=> {
 })
 
 
-router.post('/user/login', (req,res)=> {
-    res.send("User logged in successfully")
+router.post('/user/login', async(req,res)=> {
+        console.log("this is the function")
+ 
+    try{
+        const user = await  User.findbyCredentials(req.body.email , req.body.password) 
+        const token  = await user.generateAuthToken()   
+        res.send({user , token})
+    }catch(e)
+    {
+        res.send({error : e.message})
+    }
+
 })
 
 router.post('/user/logout' , (req,res)=> {
@@ -47,7 +58,7 @@ router.post('/user/logout/all' , (req,res) => {
     res.send("All users are logged out successfully");
 })
 
-router.get('/user' , async(req,res)=> {
+router.get('/user'  , async(req,res)=> {
     const allUsers =   await User.find()
 
     res.send(allUsers)
