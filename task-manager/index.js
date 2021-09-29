@@ -5,11 +5,12 @@ const user = require('./src/routers/user')
 const app = express();
 const port = process.env.PORT || 3000;
 
+app.use(express.json());
 app.use(task)
 app.use(user)
 
 app.get("/", (req,res)=> {
-    res.send("This is home page")
+    res.send("home page")
 })
 
 app.listen(port ,()=> {

@@ -40,6 +40,15 @@ const userSchema = new mongoose.Schema( {
     }
 })
 
+
+//not a arrow function this is just for binding
+
+//middleware  before saveing the database
+userSchema.pre('save' , function (next) {
+    const user = this;
+    console.log("before saving to database")
+    next();
+} )
 const User = mongoose.model('User', userSchema )
 
 
